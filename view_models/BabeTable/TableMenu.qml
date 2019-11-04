@@ -40,7 +40,8 @@ Menu
 
     MenuItem
     {
-        text: qsTr("Select...")
+        text: qsTr("Select")
+        icon.name: "edit-select"
         onTriggered:
         {
             H.addToSelection(list.get(listView.currentIndex))
@@ -57,6 +58,7 @@ Menu
     MenuItem
     {
         text: qsTr("Play")
+        icon.name: "media-playback-start"
         onTriggered:
         {
             playClicked()
@@ -77,6 +79,7 @@ Menu
     MenuItem
     {
         text: qsTr("Append")
+        icon.name: "media-playlist-append"
         onTriggered:
         {
             appendClicked()
@@ -87,6 +90,7 @@ Menu
     MenuItem
     {
         text: qsTr("Remove")
+        icon.name: "list-remove"
         onTriggered:
         {
             removeClicked()
@@ -100,6 +104,7 @@ Menu
     MenuItem
     {
         text: !fav ? qsTr("Fav it"): qsTr("UnFav it")
+        icon.name: "love"
         onTriggered:
         {
             favClicked()
@@ -110,6 +115,7 @@ Menu
     MenuItem
     {
         text: qsTr("Add to")
+        icon.name: "list-add"
         onTriggered:
         {
             saveToClicked()
@@ -121,7 +127,8 @@ Menu
 
     MenuItem
     {
-        text: qsTr("Share...")
+        text: qsTr("Share")
+        icon.name: "document-share"
         onTriggered:
         {
             shareClicked()
@@ -134,6 +141,7 @@ Menu
 //    {
 //        visible: Maui.App.handleAccounts
 //        text: qsTr("Copy to cloud")
+//        icon.name: "cloud-upload"
 //        onTriggered:
 //        {
 //            copyToClicked()
@@ -144,6 +152,7 @@ Menu
     MenuItem
     {
         text: qsTr("Show in folder")
+        icon.name: "folder-open"
         visible: !isAndroid
         onTriggered:
         {
@@ -157,7 +166,8 @@ Menu
     MenuItem
     {
         visible: false
-        text: qsTr("Edit.")
+        text: qsTr("Edit")
+        icon.name: "document-edit"
         onTriggered:
         {
             editClicked()
@@ -167,7 +177,8 @@ Menu
 
 //    Maui.MenuItem
 //    {
-//        text: qsTr("Info...")
+//        text: qsTr("Info")
+//        icon.name: "documentinfo"
 //        onTriggered:
 //        {
 //            infoClicked()
@@ -179,6 +190,7 @@ Menu
     MenuItem
     {
         text: qsTr("Delete")
+        icon.name: "edit-delete"
         Kirigami.Theme.textColor: Kirigami.Theme.negativeTextColor
         onTriggered:
         {
