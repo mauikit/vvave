@@ -1,6 +1,6 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Layouts 1.3
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import QtGraphicalEffects 1.0
 import org.kde.kirigami 2.2 as Kirigami
 import org.kde.mauikit 1.0 as Maui
@@ -17,7 +17,6 @@ Maui.Page
 {
     id: mainPlaylistRoot
 
-    property alias albumsRoll : albumsRoll
     property alias list : table.list
     property alias listModel: table.listModel
     property alias listView : table.listView
@@ -39,68 +38,11 @@ Maui.Page
         onSaveToClicked: table.saveList()
     }
 
-    footBar.visible: !mainlistEmpty
-    footBar.width: parent.width
-    footBar.middleContent: AlbumsRoll
+    footer: AlbumsRoll
     {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        id: albumsRoll
-    }
-
-    footBar.background: Item
-    {
-        id: footerBg
-        height: footBar.implicitHeight
-
-        Image
-        {
-            id: artworkBg
-            height: parent.height
-            width: parent.width
-
-            sourceSize.width: parent.width
-            sourceSize.height: parent.height
-
-            fillMode: Image.PreserveAspectCrop
-            antialiasing: true
-            smooth: true
-            asynchronous: true
-
-            source: currentArtwork
-        }
-
-        FastBlur
-        {
-            id: fastBlur
-            anchors.fill: parent
-            y:1
-            source: artworkBg
-            radius: 100
-            transparentBorder: false
-            cached: true
-            z:1
-            clip: true
-
-            LinearGradient
-            {
-                    anchors.fill: parent
-                    start: Qt.point(0, 0)
-                    end: Qt.point(0, parent.height)
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: Kirigami.Theme.viewBackgroundColor }
-                        GradientStop { position: 1; color: "transparent" }
-                    }
-
-                    Rectangle
-                    {
-                        anchors.fill: parent
-                        color: Kirigami.Theme.viewBackgroundColor
-                        opacity: 0.7
-                    }
-
-                }
-        }
+        id: _albumsRoll
+        width: table.width
+        position: ToolBar.Footer
     }
 
     BabeTable
@@ -110,19 +52,46 @@ Maui.Page
         focus: true
         headBar.visible: false
         footBar.visible: false
-        quickPlayVisible: false
         coverArtVisible: true
-        trackRating: true
-        showIndicator : true
-        menuItemVisible: false
-        holder.emoji: "qrc:/assets/Radio.png"
+        holder.emoji: "qrc:/assets/dialog-information.svg"
         holder.isMask: false
         holder.title : "Meh!"
         holder.body: "Start putting together your playlist!"
         holder.emojiSize: Maui.Style.iconSizes.huge
         onRowClicked: play(index)
+        showQuickActions: false
+
+        listView.footer: Maui.ToolBar
+        {
+            Kirigami.Theme.inherit: false
+            z: table.z + 999
+            width: table.width
+
+            leftContent: Label
+            {
+                text: root.syncPlaylist
+            }
+
+            rightContent: [
+            ToolButton
+                {
+                    icon.name: "edit-clear"
+                    onClicked: mainPlaylist.table.list.clear()
+                },
+
+                ToolButton
+                    {
+                        icon.name: "document-save"
+                        onClicked: mainPlaylist.table.saveList()
+                    }
+
+
+            ]
+        }
 
         onArtworkDoubleClicked: contextMenu.babeIt(index)
+
+        property int startContentY
 
         Component.onCompleted:
         {

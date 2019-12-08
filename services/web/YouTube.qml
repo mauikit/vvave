@@ -1,5 +1,5 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import "../../view_models"
 import "../../view_models/BabeTable"
@@ -180,39 +180,14 @@ Maui.Page
         {
             id: youtubeTable
             trackNumberVisible: false
-            headBar.visible: true
+            headBar.visible: false
             holder.emoji: "qrc:/assets/Astronaut.png"
             holder.isMask: false
             holder.title : "No Results!"
             holder.body: "Try with another query"
             holder.emojiSize: Maui.Style.iconSizes.huge
             coverArtVisible: true
-            trackDuration: true
-            trackRating: true
-            isArtworkRemote: true
-            allowMenu: false
-            actionToolBar.visible: false
-
             model: ListModel{}
-
-            //            appendBtn.visible: false
-            //            playAllBtn.visible: false
-
-
-            headBar.rightContent: [
-                ToolButton
-                {
-                    id: menuBtn
-                    icon.name: "application-menu"
-                    onClicked: configPopup.open()
-                },
-                ToolButton
-                {
-                    icon.name: "edit-clear"
-                    onClicked: clearSearch()
-                }
-            ]
-
             onRowClicked:
             {
                 watchVideo(youtubeTable.model.get(index))
@@ -222,13 +197,25 @@ Maui.Page
             {
                 playTrack(youtubeTable.model.get(index).url)
             }
-
         }
 
         YoutubeViewer
         {
             id: youtubeViewer
         }
+    }
+
+    footBar.leftContent: ToolButton
+    {
+        id: menuBtn
+        icon.name: "application-menu"
+        onClicked: configPopup.open()
+    }
+
+    footBar.rightContent: ToolButton
+    {
+        icon.name: "edit-clear"
+        onClicked: clearSearch()
     }
 
     footBar.middleContent: Maui.TextField

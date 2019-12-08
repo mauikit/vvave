@@ -1,6 +1,6 @@
-import QtQuick 2.9
+import QtQuick 2.10
 import QtGraphicalEffects 1.0
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import AlbumsList 1.0
 import org.kde.kirigami 2.7 as Kirigami
@@ -19,6 +19,12 @@ Maui.ItemDelegate
     property bool showIndicator :  false
     property bool hideRepeated : false
     property bool increaseCurrentItem : false
+
+    property alias label1 : _label1
+    property alias label2 : _label2
+    property alias image : _image
+
+
     isCurrentItem: GridView.isCurrentItem
     //    height: typeof album === 'undefined' ? parseInt(albumSize+(albumSize*0.3)) : parseInt(albumSize+(albumSize*0.4))
 
@@ -40,36 +46,13 @@ Maui.ItemDelegate
 
     Item
     {
+        id: _cover
         anchors.fill: parent
         anchors.margins: Maui.Style.space.tiny
 
-        DropShadow
-        {
-            anchors.fill: card
-            visible: card.visible
-            horizontalOffset: 0
-            verticalOffset: 0
-            radius: 8.0
-            samples: 17
-            color: "#80000000"
-            source: card
-        }
-
-        Rectangle
-        {
-            id: card
-            z: -999
-            visible: albumCard
-            anchors.centerIn: img
-            anchors.fill: img
-
-            color: fillColor
-            radius: albumRadius
-        }
-
         Image
         {
-            id: img
+            id: _image
             width: parent.width
             height: width
             sourceSize.width: width
@@ -78,28 +61,26 @@ Maui.ItemDelegate
             fillMode: Image.PreserveAspectFit
             smooth: true
             asynchronous: true
-            source: model.artwork ?  model.artwork : "qrc:/assets/cover.png"
 
             onStatusChanged:
             {
                 if (status == Image.Error)
-                 source = "qrc:/assets/cover.png";
-
-             }
+                    source = "qrc:/assets/cover.png";
+            }
 
             layer.enabled: albumRadius
             layer.effect: OpacityMask
             {
                 maskSource: Item
                 {
-                    width: img.width
-                    height: img.height
+                    width: _image.width
+                    height: _image.height
 
                     Rectangle
                     {
                         anchors.centerIn: parent
-                        width: img.adapt ? img.width : Math.min(img.width, img.height)
-                        height: img.adapt ? img.height : width
+                        width: _image.adapt ? _image.width : Math.min(_image.width, _image.height)
+                        height: _image.adapt ? _image.height : width
                         radius: albumRadius
                     }
                 }
@@ -110,8 +91,8 @@ Maui.ItemDelegate
         {
             visible : showIndicator && currentTrackIndex === index
 
-            height: img.height * 0.1
-            width: img.width * 0.1
+            height: _image.height * 0.1
+            width: _image.width * 0.1
             anchors.bottom: parent.bottom
             anchors.bottomMargin: Maui.Style.space.big
             anchors.horizontalCenter:parent.horizontalCenter
@@ -146,9 +127,9 @@ Maui.ItemDelegate
                 anchors.fill: parent
                 source: ShaderEffectSource
                 {
-                    sourceItem: img
+                    sourceItem: _image
                     sourceRect:Qt.rect(0,
-                                       img.height - _labelBg.height,
+                                       _image.height - _labelBg.height,
                                        _labelBg.width,
                                        _labelBg.height)
                 }
@@ -184,7 +165,7 @@ Maui.ItemDelegate
                             }
                         }
                     }
-                }               
+                }
             }
 
             ColumnLayout
@@ -197,9 +178,9 @@ Maui.ItemDelegate
 
                 Label
                 {
+                    id: _label1
                     Layout.fillWidth: visible
                     Layout.fillHeight: visible
-                    text: list.query === Albums.ALBUMS ? model.album : model.artist
                     visible: text && control.width > 50
                     horizontalAlignment: Qt.AlignLeft
                     elide: Text.ElideRight
@@ -212,10 +193,9 @@ Maui.ItemDelegate
 
                 Label
                 {
+                    id: _label2
                     Layout.fillWidth: visible
                     Layout.fillHeight: visible
-
-                    text: list.query === Albums.ALBUMS ? model.artist : ""
                     visible: text && (control.width > 70)
                     horizontalAlignment: Qt.AlignLeft
                     elide: Text.ElideRight
@@ -227,6 +207,15 @@ Maui.ItemDelegate
         }
     }
 
-
-
+    DropShadow
+    {
+        anchors.fill: _cover
+        visible: !control.hovered
+        horizontalOffset: 0
+        verticalOffset: 0
+        radius: 8.0
+        samples: 17
+        color: "#80000000"
+        source: _cover
+    }
 }

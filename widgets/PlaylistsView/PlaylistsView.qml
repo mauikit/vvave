@@ -1,6 +1,6 @@
-import QtQuick 2.9
+import QtQuick 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import org.kde.kirigami 2.7 as Kirigami
 import org.kde.mauikit 1.0 as Maui
 
@@ -16,12 +16,13 @@ ColumnLayout
 
     property string playlistQuery
     property alias playlistModel : playlistViewModel.model
-    property alias playlistList : playlistViewModel.list
     property alias playlistViewList : playlistViewModel
+
+    property alias listModel : filterList.listModel
 
     signal rowClicked(var track)
     signal quickPlayTrack(var track)
-    signal playAll()
+    signal playAll(string playlist)
     signal playSync(var playlist)
     signal appendAll()
 
@@ -37,7 +38,7 @@ ColumnLayout
         PlaylistsViewModel
         {
             id: playlistViewModel
-            onPlaySync: syncAndPlay(index)
+//            onPlaySync: syncAndPlay(index)
         }
 
         BabeList
@@ -87,15 +88,12 @@ ColumnLayout
             id: filterList
             anchors.fill: parent
             clip: true
-            quickPlayVisible: true
             coverArtVisible: true
-            trackRating: true
-            trackDuration: false
             headBar.visible: !holder.visible
-            title: playlistViewModel.list.get(playlistViewModel.currentIndex).playlist
-            holder.emoji: "qrc:/assets/Electricity.png"
+            title: playlistsList.get(playlistViewModel.currentIndex).playlist
+            holder.emoji: "qrc:/assets/dialog-information.svg"
             holder.isMask: false
-            holder.title : playlistViewModel.list.get(playlistViewModel.currentIndex).playlist
+            holder.title : playlistsList.get(playlistViewModel.currentIndex).playlist
             holder.body: "Your playlist is empty,<br>start adding new music to it"
             holder.emojiSize: Maui.Style.iconSizes.huge
 
@@ -157,10 +155,10 @@ ColumnLayout
             Connections
             {
                 target: filterList
-                onRowClicked: control.rowClicked(filterList.model.get(index))
-                onQuickPlayTrack: control.quickPlayTrack(filterList.model.get(filterList.currentIndex))
+                onRowClicked: control.rowClicked(filterList.listModel.get(index))
+                onQuickPlayTrack: control.quickPlayTrack(filterList.listModel.get(filterList.currentIndex))
 
-                onPlayAll: playAll()
+                onPlayAll: control.syncAndPlay(playlistViewModel.currentIndex)
                 onAppendAll: appendAll()
                 onPulled: populate(playlistQuery)
             }
@@ -171,7 +169,7 @@ ColumnLayout
 
                 onRemoveClicked:
                 {
-                    playlistList.removeTrack(playlistViewList.currentIndex, filterList.list.get(filterList.currentIndex).url)
+                    playlistsList.removeTrack(playlistViewList.currentIndex, filterList.listModel.get(filterList.currentIndex).url)
                     populate(playlistQuery)
                 }
             }
@@ -205,12 +203,14 @@ ColumnLayout
 
     function syncAndPlay(index)
     {
-        if(!playlistList.get(index).playlistIcon)
-            playSync(playlistList.get(index).playlist)
+        if(!playlistsList.get(index).playlistIcon)
+            control.playAll(playlistsList.get(index).playlist)
+
+        _filterDialog.close()
     }
 
     function removePlaylist()
     {
-        playlistList.removePlaylist(playlistViewList.currentIndex)
+        playlistsList.removePlaylist(playlistViewList.currentIndex)
     }
 }

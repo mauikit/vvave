@@ -37,7 +37,7 @@
 #include "models/tracks/tracksmodel.h"
 #include "models/albums/albumsmodel.h"
 #include "models/playlists/playlistsmodel.h"
-//#include "models/cloud/cloud.h"
+#include "models/cloud/cloud.h"
 
 #ifdef Q_OS_ANDROID
 Q_DECL_EXPORT
@@ -49,9 +49,10 @@ int main(int argc, char *argv[])
 
 #ifdef Q_OS_ANDROID
     QGuiApplication app(argc, argv);
-    QGuiApplication::styleHints()->setMousePressAndHoldInterval(1000); // in [ms]
+    //    QGuiApplication::styleHints()->setMousePressAndHoldInterval(1000); // in [ms]
+//    QGuiApplication::styleHints()->setMouseDoubleClickInterval(250);
     if (!MAUIAndroid::checkRunTimePermissions())
-            return -1;
+        return -1;
 #else
     QApplication app(argc, argv);
 #endif
@@ -78,7 +79,7 @@ int main(int argc, char *argv[])
 
     /* Services */
     YouTube youtube;
-//    Spotify spotify;
+    //    Spotify spotify;
 
     QFontDatabase::addApplicationFont(":/assets/materialdesignicons-webfont.ttf");
 
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<TracksModel>("TracksList", 1, 0, "Tracks");
     qmlRegisterType<PlaylistsModel>("PlaylistsList", 1, 0, "Playlists");
     qmlRegisterType<AlbumsModel>("AlbumsList", 1, 0, "Albums");
-//    qmlRegisterType<Cloud>("CloudList", 1, 0, "CloudList");
+    qmlRegisterType<Cloud>("CloudList", 1, 0, "Cloud");
 
     qmlRegisterType<Player>("Player", 1, 0, "Player");
 

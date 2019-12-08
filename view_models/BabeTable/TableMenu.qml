@@ -1,6 +1,6 @@
 import QtQuick 2.0
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import "../../utils"
 import ".."
@@ -23,6 +23,7 @@ Menu
     signal removeClicked()
     signal favClicked()
     signal queueClicked()
+    signal playClicked()
     signal saveToClicked()
     signal openWithClicked()
     signal editClicked()
@@ -32,15 +33,22 @@ Menu
     signal colorClicked(color color)
     signal infoClicked()
     signal copyToClicked()
+    signal appendClicked()
+    signal deleteClicked()
 
     property alias menuItem : control.contentData
 
     MenuItem
     {
-        text: qsTr("Select...")
+        text: qsTr("Select")
+        icon.name: "edit-select"
         onTriggered:
         {
             H.addToSelection(list.get(listView.currentIndex))
+
+            if(Kirigami.Settings.isMobile)
+                selectionMode = true
+
             contextMenu.close()
         }
     }
@@ -49,10 +57,11 @@ Menu
 
     MenuItem
     {
-        text: !fav ? qsTr("Fav it"): qsTr("UnFav it")
+        text: qsTr("Play")
+        icon.name: "media-playback-start"
         onTriggered:
         {
-            favClicked()
+            playClicked()
             close()
         }
     }
@@ -69,7 +78,44 @@ Menu
 
     MenuItem
     {
-        text: qsTr("Add to...")
+        text: qsTr("Append")
+        icon.name: "media-playlist-append"
+        onTriggered:
+        {
+            appendClicked()
+            close()
+        }
+    }
+
+    MenuItem
+    {
+        text: qsTr("Remove")
+        icon.name: "list-remove"
+        onTriggered:
+        {
+            removeClicked()
+            list.remove(listView.currentIndex)
+            close()
+        }
+    }
+
+    MenuSeparator{}
+
+    MenuItem
+    {
+        text: !fav ? qsTr("Fav it"): qsTr("UnFav it")
+        icon.name: "love"
+        onTriggered:
+        {
+            favClicked()
+            close()
+        }
+    }
+
+    MenuItem
+    {
+        text: qsTr("Add to")
+        icon.name: "list-add"
         onTriggered:
         {
             saveToClicked()
@@ -81,7 +127,8 @@ Menu
 
     MenuItem
     {
-        text: qsTr("Share...")
+        text: qsTr("Share")
+        icon.name: "document-share"
         onTriggered:
         {
             shareClicked()
@@ -94,6 +141,7 @@ Menu
 //    {
 //        visible: Maui.App.handleAccounts
 //        text: qsTr("Copy to cloud")
+//        icon.name: "cloud-upload"
 //        onTriggered:
 //        {
 //            copyToClicked()
@@ -103,8 +151,9 @@ Menu
 
     MenuItem
     {
-        text: isAndroid ? qsTr("Open with...") : qsTr("Show in folder...")
-
+        text: qsTr("Show in folder")
+        icon.name: "folder-open"
+        visible: !isAndroid
         onTriggered:
         {
             openWithClicked()
@@ -117,7 +166,8 @@ Menu
     MenuItem
     {
         visible: false
-        text: qsTr("Edit...")
+        text: qsTr("Edit")
+        icon.name: "document-edit"
         onTriggered:
         {
             editClicked()
@@ -127,7 +177,8 @@ Menu
 
 //    Maui.MenuItem
 //    {
-//        text: qsTr("Info...")
+//        text: qsTr("Info")
+//        icon.name: "documentinfo"
 //        onTriggered:
 //        {
 //            infoClicked()
@@ -138,12 +189,12 @@ Menu
 
     MenuItem
     {
-        text: qsTr("Remove")
+        text: qsTr("Delete")
+        icon.name: "edit-delete"
         Kirigami.Theme.textColor: Kirigami.Theme.negativeTextColor
         onTriggered:
         {
-            removeClicked()
-            //            listModel.remove(list.currentIndex)
+            deleteClicked()
             close()
         }
     }

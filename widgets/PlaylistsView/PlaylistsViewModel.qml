@@ -1,6 +1,6 @@
-import QtQuick 2.9
+import QtQuick 2.10
 import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.2
+import QtQuick.Controls 2.10
 import org.kde.kirigami 2.6 as Kirigami
 import org.kde.mauikit 1.0 as Maui
 import PlaylistsList 1.0
@@ -16,7 +16,6 @@ BabeList
 {
     id: control
 
-    property alias list: _playlistsList
     signal playSync(int index)
     topPadding: Maui.Style.contentMargins
 
@@ -50,12 +49,7 @@ BabeList
     Maui.BaseModel
     {
         id: _playlistsModel
-        list: _playlistsList
-    }
-
-    Playlists
-    {
-        id: _playlistsList
+        list: playlistsList
     }
 
     model: _playlistsModel
@@ -73,7 +67,7 @@ BabeList
             onClicked :
             {
                 currentIndex = index
-                var playlist = _playlistsList.get(index).playlist
+                var playlist = playlistsList.get(index).playlist
                 filterList.group = false
 
                 switch(playlist)
@@ -133,7 +127,7 @@ BabeList
     function addPlaylist(text)
     {
         var title = text.trim()
-        if(list.insertAt(title,  0))
+        if(playlistList.insertAt(title,  0))
             control.listView.positionViewAtEnd()
     }
 }

@@ -1,20 +1,54 @@
 #include "player.h"
 #include "../../utils/bae.h"
 
+#ifdef STATIC_MAUIKIT
+#include "mauiaccounts.h"
+#else
+#include <mauiaccounts.h>
+#endif
 
 Player::Player(QObject *parent) : QObject(parent),
     player(new QMediaPlayer(this)),
     updater(new QTimer(this))
-{
-    this->buffer = new QBuffer(this->player);
-
-//    connect(this->player, &QMediaPlayer::durationChanged, this, [&](qint64 dur)
-//    {
-//        emit this->durationChanged(/*BAE::transformTime(dur/1000)*/);
-//    });
-
+{ 
     this->player->setVolume(this->volume);
     connect(this->updater, &QTimer::timeout, this, &Player::update);
+}
+
+inline QNetworkRequest getOcsRequest(const QNetworkRequest& request)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    qDebug()<< "FORMING THE REQUEST" << request.url();
+
+    // Read raw headers out of the provided request
+    QMap<QByteArray, QByteArray> rawHeaders;
+    for (const QByteArray& headerKey : request.rawHeaderList()) {
+        rawHeaders.insert(headerKey, request.rawHeader(headerKey));
+    }
+
+    const auto account = FMH::toModel(MauiAccounts::instance()->getCurrentAccount());
+
+    const QString concatenated =  QString("%1:%2").arg(account[FMH::MODEL_KEY::USER], account[FMH::MODEL_KEY::PASSWORD]);
+    const QByteArray data = concatenated.toLocal8Bit().toBase64();
+    const QString headerData = "Basic " + data;
+
+
+    // Construct new QNetworkRequest with prepared header values
+    QNetworkRequest newRequest(request);
+
+    newRequest.setRawHeader(QString("Authorization").toLocal8Bit(), headerData.toLocal8Bit());
+    newRequest.setRawHeader(QByteArrayLiteral("OCS-APIREQUEST"), QByteArrayLiteral("true"));
+    newRequest.setRawHeader(QByteArrayLiteral("Cache-Control"), QByteArrayLiteral("public"));
+    newRequest.setRawHeader(QByteArrayLiteral("Content-Description"), QByteArrayLiteral("File Transfer"));
+
+    newRequest.setHeader(QNetworkRequest::ContentTypeHeader, "audio/mpeg");
+    newRequest.setAttribute(QNetworkRequest::CacheSaveControlAttribute, true);
+    newRequest.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::PreferCache);
+
+    qDebug() << "headers" << newRequest.rawHeaderList() << newRequest.url();
+
+    return newRequest;
 }
 
 bool Player::play() const
@@ -75,25 +109,7 @@ QString Player::transformTime(const int &pos)
     return BAE::transformTime(pos);
 }
 
-void Player::appendBuffe(QByteArray &array)
-{
-    qDebug()<<"APENDING TO BUFFER"<< array << this->array;
-    this->array.append(array, array.length());
-    amountBuffers++;
-
-    if(amountBuffers == 1)
-        playBuffer();
-}
-
-void Player::playRemote(const QString &url)
-{
-    qDebug()<<"Trying to play remote"<<url;
-    this->url = url;
-    this->player->setMedia(QUrl::fromUserInput(url));
-    this->play();
-}
-
-void Player::setUrl(const QString &value)
+void Player::setUrl(const QUrl &value)
 {
     if(value == this->url)
         return;
@@ -104,12 +120,13 @@ void Player::setUrl(const QString &value)
     this->pos = 0;
     emit this->posChanged();
 
-    const auto media = QMediaContent(this->url);
+    const auto media = this->url.isLocalFile() ? QMediaContent(this->url) : QMediaContent(getOcsRequest(QNetworkRequest(this->url)));
+
     this->player->setMedia(media);
     this->emitState();
 }
 
-QString Player::getUrl() const
+QUrl Player::getUrl() const
 {
     return this->url;
 }
@@ -133,7 +150,6 @@ int Player::getDuration() const
 {
     return static_cast<int>(this->player->duration());
 }
-
 
 Player::STATE Player::getState() const
 {
@@ -175,22 +191,12 @@ int Player::getPos() const
     return this->pos;
 }
 
-void Player::playBuffer()
-{
-    buffer->setData(array);
-    buffer->open(QIODevice::ReadOnly);
-    if(!buffer->isReadable()) qDebug()<<"Cannot read buffer";
-    player->setMedia(QMediaContent(),buffer);
-    this->url = "buffer";
-    this->play();
-    this->emitState();
-}
-
 void Player::update()
 {
     if(this->player->isAvailable())
     {
         this->pos = static_cast<int>(static_cast<double>(this->player->position())/this->player->duration()*1000);;
+        emit this->durationChanged();
         emit this->posChanged();
     }
 

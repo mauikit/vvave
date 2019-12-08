@@ -1,5 +1,5 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 
 import "../view_models/BabeGrid"
@@ -22,11 +22,13 @@ BabeGrid
     property var tracks: []
 
     property alias table : albumsViewTable
-//    property alias tagBar : tagBar
+    property alias listModel : albumsViewTable.listModel
+    //    property alias tagBar : tagBar
 
     signal rowClicked(var track)
     signal playTrack(var track)
     signal queueTrack(var track)
+    signal appendTrack(var track)
 
     signal appendAll(string album, string artist)
     signal playAll(string album, string artist)
@@ -37,77 +39,75 @@ BabeGrid
     //        topPadding: Maui.Style.space.large
     onAlbumCoverPressed: albumCoverPressedAndHold(album, artist)
     headBar.visible: false
-//    headBar.rightContent: Kirigami.ActionToolBar
-//    {
-//        Layout.fillWidth: true
-//        actions:   [
-//            Kirigami.Action
-//        {
-//            id: sortBtn
-//            icon.name: "view-sort"
-//                text: qsTr("Sort")
+    //    headBar.rightContent: Kirigami.ActionToolBar
+    //    {
+    //        Layout.fillWidth: true
+    //        actions:   [
+    //            Kirigami.Action
+    //        {
+    //            id: sortBtn
+    //            icon.name: "view-sort"
+    //                text: qsTr("Sort")
 
 
-//                    Kirigami.Action
-//                {
-//                    text: qsTr("Artist")
-//                    checkable: true
-//                    checked: list.sortBy === Albums.ARTIST
-//                    onTriggered: list.sortBy = Albums.ARTIST
-//                }
+    //                    Kirigami.Action
+    //                {
+    //                    text: qsTr("Artist")
+    //                    checkable: true
+    //                    checked: list.sortBy === Albums.ARTIST
+    //                    onTriggered: list.sortBy = Albums.ARTIST
+    //                }
 
-//                Kirigami.Action
-//                {
-//                    text: qsTr("Album")
-//                    checkable: true
-//                    checked: list.sortBy === Albums.ALBUM
-//                    onTriggered: list.sortBy = Albums.ALBUM
-//                }
+    //                Kirigami.Action
+    //                {
+    //                    text: qsTr("Album")
+    //                    checkable: true
+    //                    checked: list.sortBy === Albums.ALBUM
+    //                    onTriggered: list.sortBy = Albums.ALBUM
+    //                }
 
-//                Kirigami.Action
-//                {
-//                    text: qsTr("Release date")
-//                    checkable: true
-//                    checked: list.sortBy === Albums.RELEASEDATE
-//                    onTriggered: list.sortBy = Albums.RELEASEDATE
-//                }
+    //                Kirigami.Action
+    //                {
+    //                    text: qsTr("Release date")
+    //                    checkable: true
+    //                    checked: list.sortBy === Albums.RELEASEDATE
+    //                    onTriggered: list.sortBy = Albums.RELEASEDATE
+    //                }
 
-//                Kirigami.Action
-//                {
-//                    text: qsTr("Add date")
-//                    checkable: true
-//                    checked: list.sortBy === Albums.ADDDATE
-//                    onTriggered: list.sortBy = Albums.ADDDATE
-//                }
-//            }
-//    ]
-//    }
+    //                Kirigami.Action
+    //                {
+    //                    text: qsTr("Add date")
+    //                    checkable: true
+    //                    checked: list.sortBy === Albums.ADDDATE
+    //                    onTriggered: list.sortBy = Albums.ADDDATE
+    //                }
+    //            }
+    //    ]
+    //    }
 
-//    headBar.rightContent: [
+    //    headBar.rightContent: [
 
-//        ToolButton
-//        {
-//            id: appendBtn
-//            visible: headBar.visible && albumsViewGrid.count > 0
-//            anim : true
-//            icon.name : "media-playlist-append"//"media-repeat-track-amarok"
-//            onClicked: appendAll()
-//        }
-//    ]
+    //        ToolButton
+    //        {
+    //            id: appendBtn
+    //            visible: headBar.visible && albumsViewGrid.count > 0
+    //            anim : true
+    //            icon.name : "media-playlist-append"//"media-repeat-track-amarok"
+    //            onClicked: appendAll()
+    //        }
+    //    ]
 
     Maui.Dialog
     {
         id: albumDialog
-        property string title
         parent: parent
-        maxHeight: maxWidth
         maxWidth: Maui.Style.unit * 600
+        maxHeight: Math.min(Maui.Style.unit * 600, albumsViewTable.listView.contentHeight + albumsViewTable.headBar.height + (Maui.Style.space.huge*2))
         widthHint: 0.9
         heightHint: 0.9
         defaultButtons: false
         page.padding: 0
-headBar.visible: true
-page.title: title
+
         ColumnLayout
         {
             id: albumFilter
@@ -117,18 +117,14 @@ page.title: title
             BabeTable
             {
                 id: albumsViewTable
-                headBar.position: ToolBar.Footer
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 trackNumberVisible: true
-                trackRating: true
                 headBar.visible: true
                 coverArtVisible: true
-                quickPlayVisible: true
                 focus: true
                 list.sortBy: Tracks.TRACK
-
-                holder.emoji: "qrc:/assets/ElectricPlug.png"
+                holder.emoji: "qrc:/assets/dialog-information.svg"
                 holder.isMask: false
                 holder.title : "Oops!"
                 holder.body: "This list is empty"
@@ -136,17 +132,22 @@ page.title: title
 
                 onRowClicked:
                 {
-                    albumsViewGrid.rowClicked(list.get(index))
+                    albumsViewGrid.rowClicked(listModel.get(index))
                 }
 
                 onQuickPlayTrack:
                 {
-                    albumsViewGrid.playTrack(list.get(index))
+                    albumsViewGrid.playTrack(listModel.get(index))
                 }
 
                 onQueueTrack:
                 {
-                    albumsViewGrid.queueTrack(list.get(index))
+                    albumsViewGrid.queueTrack(listModel.get(index))
+                }
+
+                onAppendTrack:
+                {
+                    albumsViewGrid.appendTrack(listModel.get(index))
                 }
 
                 onPlayAll:
@@ -162,14 +163,14 @@ page.title: title
                 }
             }
 
-//            Maui.TagsBar
-//            {
-//                id: tagBar
-//                visible:false
-//                Layout.fillWidth: true
-//                allowEditMode: false
-//                onTagClicked: H.searchFor("tag:"+tag)
-//            }
+            //            Maui.TagsBar
+            //            {
+            //                id: tagBar
+            //                visible:false
+            //                Layout.fillWidth: true
+            //                allowEditMode: false
+            //                onTagClicked: H.searchFor("tag:"+tag)
+            //            }
         }
     }
 
@@ -188,26 +189,26 @@ page.title: title
         {
             query = Q.GET.albumTracks_.arg(album)
             query = query.arg(artist)
-            albumDialog.title = album
+            albumsViewTable.title = album
             tagq = Q.GET.albumTags_.arg(album)
 
         }else if(artist && album === undefined)
         {
             query = Q.GET.artistTracks_.arg(artist)
-            albumDialog.title = artist
+            albumsViewTable.title = artist
             tagq = Q.GET.artistTags_.arg(artist)
         }
 
         albumsViewTable.list.query = query
 
         /*dunoooo*/
-//        if(tracks.length > 0)
-//        {
-//            tagq = tagq.arg(artist)
-//            var tags = bae.get(tagq)
-//            console.log(tagq, "TAGS", tags)
-//            tagBar.populate(tags)
-//        }
+        //        if(tracks.length > 0)
+        //        {
+        //            tagq = tagq.arg(artist)
+        //            var tags = bae.get(tagq)
+        //            console.log(tagq, "TAGS", tags)
+        //            tagBar.populate(tags)
+        //        }
     }
 
     function filter(tracks)

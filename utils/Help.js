@@ -40,36 +40,6 @@ function setStars(stars)
     }
 }
 
-function refreshCollection(size)
-{
-    if(size>0) root.notify("emblem-info", "Collection updated", size+" new tracks added...")
-
-    refreshTracks()
-    refreshAlbums()
-    refreshArtists()
-    refreshFolders()
-}
-
-function refreshFolders()
-{
-    foldersView.populate()
-}
-
-function refreshTracks()
-{
-    tracksView.list.refresh()
-}
-
-function refreshAlbums()
-{
-    albumsView.list.refresh()
-//    albumsView.list.fetchInformation();
-}
-
-function refreshArtists()
-{
-    artistsView.list.refresh()
-}
 
 function notify(title, body)
 {
@@ -99,9 +69,16 @@ function addSource()
 
 function addToSelection(item)
 {
+    if(selectionBar.contains(item.url))
+    {
+        selectionBar.removeAtPath(item.url)
+        return
+    }
+
     item.thumbnail= item.artwork
+    item.icon = "audio-x-generic"
     item.label= item.title
-    item.mime= "image"
+    item.mime= "image/png"
     item.tooltip= item.url
     item.path= item.url
     selectionBar.append(item)

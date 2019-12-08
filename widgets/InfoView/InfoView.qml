@@ -1,5 +1,5 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.0
 import org.kde.mauikit 1.0 as Maui
@@ -64,13 +64,8 @@ Maui.Dialog
                     verticalAlignment: Qt.AlignVCenter
                     textFormat: Text.RichText
                     wrapMode: Text.Wrap
-                    //                    activeFocusOnPress : true
-                    //                    selectByMouse : true
-                    //                    cursorPosition :0
-                    //                    cursorVisible: true
                 }
             }
-
         }
 
         Rectangle

@@ -1,5 +1,5 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
+import QtQuick 2.10
+import QtQuick.Controls 2.10
 import QtQuick.Layouts 1.3
 import "../../view_models"
 import "../../view_models/BabeTable"
@@ -91,11 +91,7 @@ ColumnLayout
                 anchors.fill: parent
                 clip: true
 
-                quickPlayVisible: true
                 coverArtVisible: false
-                trackRating: true
-                trackDuration: false
-                allowMenu: false
                 headBar.visible: true
                 headBarExitIcon: "go-previous"
                 headBarExit: !linkingPage.wideMode
